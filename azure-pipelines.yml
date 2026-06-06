@@ -1,179 +1,26 @@
-parameters:
-  - name: environment
-    displayName: Environment
-    type: string
-    default: dev
-    values:
-      - dev
-      - prod
+trigger: 
+-  main
 
-trigger:
-  - main
-
-pool:
-  vmImage: Todo_Microservice_Pool
-
-
-
-variables:
-  - name: terraformWorkingDirectory
-    value: '$(System.DefaultWorkingDirectory)/environments/${{ parameters.environment }}'
-  - name: azureServiceConnection
-    value: 'azure-service-connection' # Replace with your service connection name
+pool: Todo_Microservice_Pool
 
 stages:
-  - stage: Validation
-    displayName: 'Lint, Format & Validate'
-    jobs:
-      - job: Validate
-        displayName: 'Terraform Validate'
-        steps:
-          - task: TerraformInstaller@0
-            inputs:
-              terraformVersion: 'latest'
-
-          - script: terraform fmt -check -recursive
-            workingDirectory: $(System.DefaultWorkingDirectory)
-            displayName: 'Terraform Format Check'
-
-          - task: TerraformTaskV4@4
-            displayName: 'Terraform Init'
-            inputs:
-              provider: 'azurerm'
-              command: 'init'
-              workingDirectory: $(terraformWorkingDirectory)
-              backendServiceArm: $(azureServiceConnection)
-              backendAzureRmResourceGroupName: 'Brijendra_RG'
-              backendAzureRmStorageAccountName: 'brijendrastoragelab'
-              backendAzureRmContainerName: 'brijendracontainerlab'
-              backendAzureRmKey: '${{ parameters.environment }}.terraform.tfstate'
-
-          - task: TerraformTaskV4@4
-            displayName: 'Terraform Validate'
-            inputs:
-              provider: 'azurerm'
-              command: 'validate'
-              workingDirectory: $(terraformWorkingDirectory)
-
-  - stage: StaticAnalysis
-    displayName: 'Security Scanning'
-    dependsOn: Validation
-    jobs:
-      - job: Scan
-        displayName: 'Security Scan'
-        steps:
-          - task: TFLint@0
-            displayName: 'TFLint'
-            inputs:
-              terraformVersion: 'latest'
-              workingDirectory: $(terraformWorkingDirectory)
-
-          - script: |
-              wget -q -O tfsec https://github.com/aquasecurity/tfsec/releases/latest/download/tfsec-linux-amd64
-              chmod +x tfsec
-              ./tfsec $(terraformWorkingDirectory)
-            displayName: 'tfsec Scan'
-
-          - script: |
-              pip3 install checkov
-              checkov -d $(terraformWorkingDirectory)
-            displayName: 'Checkov Scan'
-
-  - stage: Plan
-    displayName: 'Terraform Plan'
-    dependsOn: StaticAnalysis
-    jobs:
-      - job: Plan
-        displayName: 'Plan'
-        steps:
-          - task: TerraformInstaller@0
-            inputs:
-              terraformVersion: 'latest'
-
-          - task: TerraformTaskV4@4
-            displayName: 'Terraform Init'
-            inputs:
-              provider: 'azurerm'
-              command: 'init'
-              workingDirectory: $(terraformWorkingDirectory)
-              backendServiceArm: $(azureServiceConnection)
-              backendAzureRmResourceGroupName: 'rg-terraform-state'
-              backendAzureRmStorageAccountName: 'stterraformstate'
-              backendAzureRmContainerName: 'tfstate'
-              backendAzureRmKey: '${{ parameters.environment }}.terraform.tfstate'
-
-          - task: TerraformTaskV4@4
-            displayName: 'Terraform Plan'
-            inputs:
-              provider: 'azurerm'
-              command: 'plan'
-              workingDirectory: $(terraformWorkingDirectory)
-              environmentServiceNameAzureRM: $(azureServiceConnection)
-              commandOptions: '-out=tfplan'
-
-          - task: PublishPipelineArtifact@1
-            inputs:
-              targetPath: '$(terraformWorkingDirectory)/tfplan'
-              artifact: 'tfplan-${{ parameters.environment }}'
-              publishLocation: 'pipeline'
-
-  - stage: Approval
-    displayName: 'Manual Validation'
-    dependsOn: Plan
-    jobs:
-      - job: waitForValidation
-        displayName: 'Wait for external validation'
-        pool: server
-        steps:
-          - task: ManualValidation@0
-            timeoutInMinutes: 1440
-            inputs:
-              notifyUsers: |
-                yadavbriejdnra182@gmail.com
-              instructions: 'Please review the Terraform plan and approve the deployment to ${{ parameters.environment }}.'
-              onTimeout: 'reject'
-
-  - stage: Apply
-    displayName: 'Terraform Apply'
-    dependsOn: Approval
-    condition: succeeded()
-    jobs:
-      - deployment: Apply
-        displayName: 'Apply'
-        environment: '${{ parameters.environment }}'
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - checkout: self
-
-                - task: DownloadPipelineArtifact@2
-                  inputs:
-                    buildType: 'current'
-                    artifactName: 'tfplan-${{ parameters.environment }}'
-                    targetPath: $(terraformWorkingDirectory)
-
-                - task: TerraformInstaller@0
-                  inputs:
-                    terraformVersion: 'latest'
-
-                - task: TerraformTaskV4@4
-                  displayName: 'Terraform Init'
-                  inputs:
-                    provider: 'azurerm'
-                    command: 'init'
-                    workingDirectory: $(terraformWorkingDirectory)
-                    backendServiceArm: $(azureServiceConnection)
-                    backendAzureRmResourceGroupName: 'rg-terraform-state'
-                    backendAzureRmStorageAccountName: 'stterraformstate'
-                    backendAzureRmContainerName: 'tfstate'
-                    backendAzureRmKey: '${{ parameters.environment }}.terraform.tfstate'
-
-                - task: TerraformTaskV4@4
-                  displayName: 'Terraform Apply'
-                  inputs:
-                    provider: 'azurerm'
-                    command: 'apply'
-                    workingDirectory: $(terraformWorkingDirectory)
-                    environmentServiceNameAzureRM: $(azureServiceConnection)
-                    commandOptions: 'tfplan'
+- stage: Initial_Stage
+  displayName: Pre Check
+  jobs:
+  - job: Terraform_Install
+    displayName: Terraform Init
+    steps: 
+    - task: TerraformInstaller@1
+      inputs:
+        terraformVersion: 'latest'
+    
+    - task: TerraformTask@5
+      inputs:
+        provider: 'azurerm'
+        command: 'init'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/environments/devdev'
+        backendServiceArm: 'TodoApp_Service'
+        backendAzureRmResourceGroupName: 'Brijendra_RG'
+        backendAzureRmStorageAccountName: 'brijendrastoragelab'
+        backendAzureRmContainerName: 'brijendracontainerlab'
+        backendAzureRmKey: 'aksdev.terraformtfstate'
