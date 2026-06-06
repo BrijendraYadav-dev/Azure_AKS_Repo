@@ -43,9 +43,9 @@ stages:
               command: 'init'
               workingDirectory: $(terraformWorkingDirectory)
               backendServiceArm: $(azureServiceConnection)
-              backendAzureRmResourceGroupName: 'rg-terraform-state'
-              backendAzureRmStorageAccountName: 'stterraformstate'
-              backendAzureRmContainerName: 'tfstate'
+              backendAzureRmResourceGroupName: 'Brijendra_RG'
+              backendAzureRmStorageAccountName: 'brijendrastoragelab'
+              backendAzureRmContainerName: 'brijendracontainerlab'
               backendAzureRmKey: '${{ parameters.environment }}.terraform.tfstate'
 
           - task: TerraformTaskV4@4
@@ -129,7 +129,7 @@ stages:
             timeoutInMinutes: 1440
             inputs:
               notifyUsers: |
-                admin@example.com
+                yadavbriejdnra182@gmail.com
               instructions: 'Please review the Terraform plan and approve the deployment to ${{ parameters.environment }}.'
               onTimeout: 'reject'
 
