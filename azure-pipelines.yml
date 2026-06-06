@@ -18,7 +18,7 @@ stages:
       inputs:
         provider: 'azurerm'
         command: 'init'
-        workingDirectory: '$(System.DefaultWorkingDirectory)/environments/devdev'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev'
         backendServiceArm: 'TodoApp_Service'
         backendAzureRmResourceGroupName: 'Brijendra_RG'
         backendAzureRmStorageAccountName: 'brijendrastoragelab'
