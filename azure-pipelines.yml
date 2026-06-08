@@ -52,7 +52,7 @@ stages:
           ls   
           tflint
         errorActionPreference: 'continue'        
-        workingDirectory: '$(System.DefaultWorkingDirectory)/environment/dev' 
+        workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev' 
 
 - stage: coststage
   dependsOn: Scanning
@@ -65,6 +65,6 @@ stages:
         inputs:
           targetType: 'inline'
           script: 'infracost breakdown --path=.'
-          workingDirectory: '$(System.DefaultWorkingDirectory)/environment/dev'
+          workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev'
 
     
