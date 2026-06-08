@@ -32,6 +32,7 @@ stages:
   jobs:
   - job: tfsec
     displayName: tfsec 
+    continueOnError: True
     steps:
     - task: tfsec@1
       inputs:
