@@ -26,7 +26,7 @@ stages:
         backendAzureRmKey: 'aksdev.terraformtfstate'
 
 
-- stage: Scannning
+- stage: Scanning
   displayName: Scanning
   dependsOn: Initial_Stage
   jobs:
@@ -39,3 +39,32 @@ stages:
         version: 'v1.26.0'
         dir: '''$(System.DefaultWorkingDirectory)/environments/dev'''
 
+  - job: tflint
+    dependsOn: tfsec
+    displayName: TFLint
+    steps:
+    - task: PowerShell@2
+      continueOnError: true
+      inputs:
+        targetType: 'inline'
+        script: |
+          winget install TerraformLinters.tflint     
+          ls   
+          tflint
+        errorActionPreference: 'continue'        
+        workingDirectory: '$(System.DefaultWorkingDirectory)/environment/dev' 
+
+- stage: coststage
+  dependsOn: Scanning
+  displayName: Cost & Impact assesment stage
+  jobs:
+  - job: Infracost
+    displayName: InfraCost
+    steps:
+      - task: PowerShell@2
+        inputs:
+          targetType: 'inline'
+          script: 'infracost breakdown --path=.'
+          workingDirectory: '$(System.DefaultWorkingDirectory)/environment/dev'
+
+    
