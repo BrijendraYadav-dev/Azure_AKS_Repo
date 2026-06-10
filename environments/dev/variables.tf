@@ -22,8 +22,7 @@ variable "aks_clusters" {
     resource_group_name = string
     location            = string
     dns_prefix          = string
-    kubernetes_version  = optional(string)
-    dns_prefix = string
+    kubernetes_version  = optional(string) 
     default_node_pool = object({
       name       = string
       node_count = number
