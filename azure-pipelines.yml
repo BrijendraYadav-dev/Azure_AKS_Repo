@@ -69,4 +69,26 @@ stages:
           script: 'infracost breakdown --path=.'
           workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev'
 
-    
+- stage: Apply
+  dependsOn: coststage
+  displayName: Terraform Apply
+  jobs:
+  - job: Terraform_Apply
+    displayName: Terraform Apply
+    steps:
+    - task: TerraformTask@5
+      inputs:
+        provider: 'azurerm'
+        command: 'init'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev'
+        backendServiceArm: 'TodoApp_Service'
+        backendAzureRmResourceGroupName: 'Brijendra_RG'
+        backendAzureRmStorageAccountName: 'brijendrastoragelab'
+        backendAzureRmContainerName: 'brijendracontainerlab'
+        backendAzureRmKey: 'aksdev.terraformtfstate'
+    - task: TerraformTask@5
+      inputs:
+        provider: 'azurerm'
+        command: 'apply'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev'
+        environmentServiceNameAzureRM: 'TodoApp_Service'
