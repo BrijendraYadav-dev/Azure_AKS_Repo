@@ -1,6 +1,6 @@
 resource_groups = {
   "rg-dev-k8s-01" = {
-    location = "East US"
+    location = "centralindia"
     tags     = { environment = "dev", project = "landing-zone" }
   }
 }
@@ -8,7 +8,7 @@ resource_groups = {
 acrs = {
   "acrdevk8s01" = {
     resource_group_name = "rg-dev-k8s-01"
-    location            = "East US"
+    location            = "centralindia"
     sku                 = "Basic"
   }
 }
@@ -16,7 +16,7 @@ acrs = {
 aks_clusters = {
   "aks-dev-k8s-01" = {
     resource_group_name = "rg-dev-k8s-01"
-    location            = "East US"
+    location            = "centralindia"
     dns_prefix = "devaks"
     default_node_pool = {
       name       = "agentpool"
