@@ -28,7 +28,6 @@ module "aks" {
   name                = each.key
   resource_group_name = each.value.resource_group_name
   location            = each.value.location
-  dns_prefix          = each.value.dns_prefix
   kubernetes_version  = each.value.kubernetes_version
   default_node_pool   = each.value.default_node_pool
   identity_type       = each.value.identity_type
