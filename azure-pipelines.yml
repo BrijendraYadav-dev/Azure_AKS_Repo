@@ -38,7 +38,6 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
-          choco install tfsec -y
           tfsec .
         workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev'
     
