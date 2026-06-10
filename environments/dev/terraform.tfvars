@@ -17,6 +17,7 @@ aks_clusters = {
   "aks-dev-k8s-01" = {
     resource_group_name = "rg-dev-k8s-01"
     location            = "East US"
+    dns_prefix = "devaks"
     default_node_pool = {
       name       = "agentpool"
       node_count = 1

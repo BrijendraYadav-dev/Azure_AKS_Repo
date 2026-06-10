@@ -23,6 +23,7 @@ variable "aks_clusters" {
     location            = string
     dns_prefix          = string
     kubernetes_version  = optional(string)
+    dns_prefix = string
     default_node_pool = object({
       name       = string
       node_count = number

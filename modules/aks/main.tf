@@ -3,6 +3,7 @@ resource "azurerm_kubernetes_cluster" "this" {
   location            = var.location
   resource_group_name = var.resource_group_name
   kubernetes_version  = var.kubernetes_version
+  dns_prefix = var.dns_prefix
 
   default_node_pool {
     name       = var.default_node_pool.name

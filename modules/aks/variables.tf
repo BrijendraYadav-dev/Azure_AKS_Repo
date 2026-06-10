@@ -14,6 +14,10 @@ variable "kubernetes_version" {
   type    = string
   default = null
 }
+
+variable "dns_prefix" {
+  type = string
+}
 variable "default_node_pool" {
   type = object({
     name       = string
