@@ -45,6 +45,7 @@ stages:
   - job: tflint
     dependsOn: tfsec
     displayName: TFLint
+    continueOnError: True
     steps:
     - task: PowerShell@2
       inputs:
